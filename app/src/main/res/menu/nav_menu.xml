@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_students"
+            android:title="Manage Students" />
+        <item
+            android:id="@+id/nav_years"
+            android:title="Manage Years" />
+        <item
+            android:id="@+id/nav_courses"
+            android:title="Manage Courses" />
+        <item
+            android:id="@+id/nav_subjects"
+            android:title="Manage Subjects" />
+    </group>
+    <item android:title="Attendance">
+        <menu>
+            <item
+                android:id="@+id/nav_mark_attendance"
+                android:title="Mark Attendance (List)" />
+            <item
+                android:id="@+id/nav_scan_attendance"
+                android:title="Scan Barcode Attendance" />
+        </menu>
+    </item>
+</menu>
