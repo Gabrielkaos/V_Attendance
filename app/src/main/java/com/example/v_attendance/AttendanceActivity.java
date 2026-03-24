@@ -13,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import java.util.ArrayList;
 
@@ -39,6 +40,15 @@ public class AttendanceActivity extends AppCompatActivity {
         }
 
         dbHelper = new DatabaseHelper(this);
+        
+        Toolbar toolbar = findViewById(R.id.toolbarAttendance);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
+        toolbar.setNavigationOnClickListener(v -> finish());
+
         lvAttendance = findViewById(R.id.lvAttendance);
         tvEventInfo = findViewById(R.id.tvDate); // Reusing the same ID for event info
         btnSave = findViewById(R.id.btnSaveAttendance);

@@ -91,7 +91,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
         Intent intent = null;
 
-        if (id == R.id.nav_students) {
+        if (id == R.id.nav_dashboard) {
+            // Already here
+        } else if (id == R.id.nav_students) {
             intent = new Intent(this, StudentActivity.class);
         } else if (id == R.id.nav_years) {
             intent = new Intent(this, GenericCrudActivity.class);

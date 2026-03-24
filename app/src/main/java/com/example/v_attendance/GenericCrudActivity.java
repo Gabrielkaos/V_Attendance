@@ -1,22 +1,33 @@
 package com.example.v_attendance;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
 
-public class GenericCrudActivity extends AppCompatActivity {
+public class GenericCrudActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     public static final String EXTRA_TYPE = "crud_type";
     public static final String TYPE_YEAR = "Year";
@@ -29,6 +40,8 @@ public class GenericCrudActivity extends AppCompatActivity {
     private ArrayList<String> itemList;
     private ArrayAdapter<String> adapter;
     private ExtendedFloatingActionButton fabAdd;
+    private DrawerLayout drawerLayout;
+    private EditText etSearch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,11 +49,27 @@ public class GenericCrudActivity extends AppCompatActivity {
         setContentView(R.layout.activity_generic_crud);
 
         type = getIntent().getStringExtra(EXTRA_TYPE);
-        setTitle("Manage " + type + "s");
-
+        
         dbHelper = new DatabaseHelper(this);
+
+        Toolbar toolbar = findViewById(R.id.toolbarGeneric);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(type + "s");
+        }
+
+        drawerLayout = findViewById(R.id.drawer_layout_generic);
+        NavigationView navigationView = findViewById(R.id.nav_view_generic);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,
+                R.string.app_name, R.string.app_name);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+
         lvItems = findViewById(R.id.lvItems);
         fabAdd = findViewById(R.id.fabAddItem);
+        etSearch = findViewById(R.id.etSearchGeneric);
 
         itemList = new ArrayList<>();
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, itemList);
@@ -50,14 +79,27 @@ public class GenericCrudActivity extends AppCompatActivity {
 
         fabAdd.setOnClickListener(v -> showAddItemDialog());
 
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                adapter.getFilter().filter(s);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
         lvItems.setOnItemClickListener((parent, view, position, id) -> {
-            String selected = itemList.get(position);
+            String selected = adapter.getItem(position);
             String itemId = selected.split(" - ")[0];
             showStudentsInItem(itemId);
         });
 
         lvItems.setOnItemLongClickListener((parent, view, position, id) -> {
-            String selected = itemList.get(position);
+            String selected = adapter.getItem(position);
             String itemId = selected.split(" - ")[0];
             new AlertDialog.Builder(this)
                     .setTitle("Delete " + type)
@@ -78,21 +120,66 @@ public class GenericCrudActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        Intent intent = null;
+
+        if (id == R.id.nav_dashboard) {
+            intent = new Intent(this, MainActivity.class);
+        } else if (id == R.id.nav_students) {
+            intent = new Intent(this, StudentActivity.class);
+        } else if (id == R.id.nav_years) {
+            if (!TYPE_YEAR.equals(type)) {
+                intent = new Intent(this, GenericCrudActivity.class);
+                intent.putExtra(GenericCrudActivity.EXTRA_TYPE, GenericCrudActivity.TYPE_YEAR);
+            }
+        } else if (id == R.id.nav_courses) {
+            if (!TYPE_COURSE.equals(type)) {
+                intent = new Intent(this, GenericCrudActivity.class);
+                intent.putExtra(GenericCrudActivity.EXTRA_TYPE, GenericCrudActivity.TYPE_COURSE);
+            }
+        } else if (id == R.id.nav_subjects) {
+            if (!TYPE_SUBJECT.equals(type)) {
+                intent = new Intent(this, GenericCrudActivity.class);
+                intent.putExtra(GenericCrudActivity.EXTRA_TYPE, GenericCrudActivity.TYPE_SUBJECT);
+            }
+        } else if (id == R.id.nav_mark_attendance) {
+            intent = new Intent(this, EventListActivity.class);
+            intent.putExtra(EventListActivity.EXTRA_TARGET, "List");
+        } else if (id == R.id.nav_scan_attendance) {
+            intent = new Intent(this, EventListActivity.class);
+            intent.putExtra(EventListActivity.EXTRA_TARGET, "Scan");
+        }
+
+        if (intent != null) {
+            startActivity(intent);
+            finish();
+        }
+
+        drawerLayout.closeDrawers();
+        return true;
+    }
+
     private void showAddItemDialog() {
         View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_generic_add, null);
+        TextView tvTitle = dialogView.findViewById(R.id.tvGenericTitle);
+        TextInputLayout tilId = dialogView.findViewById(R.id.tilId);
+        TextInputLayout tilName = dialogView.findViewById(R.id.tilName);
         EditText etId = dialogView.findViewById(R.id.etId);
         EditText etName = dialogView.findViewById(R.id.etName);
 
+        tvTitle.setText(type + " Information");
         if (type.equals(TYPE_YEAR)) {
-            etId.setHint("Year ID (Integer)");
-            etName.setHint("Year Level (e.g. 1st Year)");
+            tilId.setHint("Year ID (Integer)");
+            tilName.setHint("Year Level (e.g. 1st Year)");
         } else {
-            etId.setHint(type + " ID (Code)");
-            etName.setHint(type + " Name");
+            tilId.setHint(type + " ID (Code)");
+            tilName.setHint(type + " Name");
         }
 
         new AlertDialog.Builder(this)
-                .setTitle("Add " + type)
+                .setTitle("Add New " + type)
                 .setView(dialogView)
                 .setPositiveButton("Add", (dialog, which) -> {
                     String id = etId.getText().toString();

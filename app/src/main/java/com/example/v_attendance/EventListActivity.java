@@ -10,21 +10,27 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class EventListActivity extends AppCompatActivity {
+public class EventListActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     public static final String EXTRA_TARGET = "target_activity";
     private DatabaseHelper dbHelper;
@@ -34,6 +40,7 @@ public class EventListActivity extends AppCompatActivity {
     private ArrayList<String> eventNames, eventIds;
     private String targetActivity;
     private ArrayAdapter<String> adapter;
+    private DrawerLayout drawerLayout;
 
     private String selectedYears = "";
     private String selectedCourses = "";
@@ -45,9 +52,24 @@ public class EventListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_event_list);
         
         targetActivity = getIntent().getStringExtra(EXTRA_TARGET);
-        setTitle("Select Event for " + targetActivity);
-
+        
         dbHelper = new DatabaseHelper(this);
+
+        Toolbar toolbar = findViewById(R.id.toolbarEventList);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("Select Event (" + targetActivity + ")");
+        }
+
+        drawerLayout = findViewById(R.id.drawer_layout_event_list);
+        NavigationView navigationView = findViewById(R.id.nav_view_event_list);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,
+                R.string.app_name, R.string.app_name);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+
         lvEvents = findViewById(R.id.lvEvents);
         fabAdd = findViewById(R.id.fabAddEvent);
         etSearch = findViewById(R.id.etSearchEvent);
@@ -95,6 +117,45 @@ public class EventListActivity extends AppCompatActivity {
                     .show();
             return true;
         });
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        Intent intent = null;
+
+        if (id == R.id.nav_dashboard) {
+            intent = new Intent(this, MainActivity.class);
+        } else if (id == R.id.nav_students) {
+            intent = new Intent(this, StudentActivity.class);
+        } else if (id == R.id.nav_years) {
+            intent = new Intent(this, GenericCrudActivity.class);
+            intent.putExtra(GenericCrudActivity.EXTRA_TYPE, GenericCrudActivity.TYPE_YEAR);
+        } else if (id == R.id.nav_courses) {
+            intent = new Intent(this, GenericCrudActivity.class);
+            intent.putExtra(GenericCrudActivity.EXTRA_TYPE, GenericCrudActivity.TYPE_COURSE);
+        } else if (id == R.id.nav_subjects) {
+            intent = new Intent(this, GenericCrudActivity.class);
+            intent.putExtra(GenericCrudActivity.EXTRA_TYPE, GenericCrudActivity.TYPE_SUBJECT);
+        } else if (id == R.id.nav_mark_attendance) {
+            if (!"List".equals(targetActivity)) {
+                intent = new Intent(this, EventListActivity.class);
+                intent.putExtra(EventListActivity.EXTRA_TARGET, "List");
+            }
+        } else if (id == R.id.nav_scan_attendance) {
+            if (!"Scan".equals(targetActivity)) {
+                intent = new Intent(this, EventListActivity.class);
+                intent.putExtra(EventListActivity.EXTRA_TARGET, "Scan");
+            }
+        }
+
+        if (intent != null) {
+            startActivity(intent);
+            finish();
+        }
+
+        drawerLayout.closeDrawers();
+        return true;
     }
 
     private void showAddEventDialog() {
