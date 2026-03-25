@@ -14,6 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -207,27 +208,32 @@ public class StudentActivity extends AppCompatActivity implements NavigationView
     }
 
     private void showStudentDetails(Student s) {
-        String yearName = dbHelper.getYearName(s.yearId);
-        String courseName = dbHelper.getCourseName(s.courseId);
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_student_details, null);
+        TextView tvId = dialogView.findViewById(R.id.tvDetailId);
+        TextView tvName = dialogView.findViewById(R.id.tvDetailName);
+        TextView tvYear = dialogView.findViewById(R.id.tvDetailYear);
+        TextView tvCourse = dialogView.findViewById(R.id.tvDetailCourse);
+        TextView tvSubjects = dialogView.findViewById(R.id.tvDetailSubjects);
+
+        tvId.setText(s.studentId);
+        tvName.setText(s.getFullName());
+        tvYear.setText(dbHelper.getYearName(s.yearId));
+        tvCourse.setText(dbHelper.getCourseName(s.courseId));
         
-        StringBuilder subjects = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         if (s.subjectIds != null && !s.subjectIds.isEmpty()) {
             String[] ids = s.subjectIds.split(",");
             for (String id : ids) {
-                if (subjects.length() > 0) subjects.append(", ");
-                subjects.append(dbHelper.getSubjectName(id));
+                if (sb.length() > 0) sb.append("\n");
+                sb.append("• ").append(dbHelper.getSubjectName(id)).append(" (").append(id).append(")");
             }
+        } else {
+            sb.append("No subjects enrolled.");
         }
-
-        String details = "ID: " + s.studentId + "\n" +
-                        "Name: " + s.getFullName() + "\n" +
-                        "Year: " + yearName + "\n" +
-                        "Course: " + courseName + "\n" +
-                        "Subjects: " + subjects.toString();
+        tvSubjects.setText(sb.toString());
 
         new AlertDialog.Builder(this)
-                .setTitle("Student Information")
-                .setMessage(details)
+                .setView(dialogView)
                 .setPositiveButton("OK", null)
                 .show();
     }

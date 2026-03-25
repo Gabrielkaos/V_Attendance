@@ -95,7 +95,8 @@ public class GenericCrudActivity extends AppCompatActivity implements Navigation
         lvItems.setOnItemClickListener((parent, view, position, id) -> {
             String selected = adapter.getItem(position);
             String itemId = selected.split(" - ")[0];
-            showStudentsInItem(itemId);
+            String itemName = selected.split(" - ")[1];
+            showItemDetails(itemId, itemName);
         });
 
         lvItems.setOnItemLongClickListener((parent, view, position, id) -> {
@@ -179,7 +180,6 @@ public class GenericCrudActivity extends AppCompatActivity implements Navigation
         }
 
         new AlertDialog.Builder(this)
-                .setTitle("Add New " + type)
                 .setView(dialogView)
                 .setPositiveButton("Add", (dialog, which) -> {
                     String id = etId.getText().toString();
@@ -206,7 +206,23 @@ public class GenericCrudActivity extends AppCompatActivity implements Navigation
                 .show();
     }
 
-    private void showStudentsInItem(String itemId) {
+    private void showItemDetails(String itemId, String itemName) {
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_generic_details, null);
+        TextView tvTitle = dialogView.findViewById(R.id.tvGenericDetailTitle);
+        TextView tvIdLabel = dialogView.findViewById(R.id.tvGenericDetailIdLabel);
+        TextView tvId = dialogView.findViewById(R.id.tvGenericDetailId);
+        TextView tvNameLabel = dialogView.findViewById(R.id.tvGenericDetailNameLabel);
+        TextView tvName = dialogView.findViewById(R.id.tvGenericDetailName);
+        TextView tvListLabel = dialogView.findViewById(R.id.tvGenericDetailListLabel);
+        TextView tvList = dialogView.findViewById(R.id.tvGenericDetailList);
+
+        tvTitle.setText(type + " Details");
+        tvIdLabel.setText(type + " ID");
+        tvId.setText(itemId);
+        tvNameLabel.setText(type + " Name");
+        tvName.setText(itemName);
+        tvListLabel.setText("Students in this " + type);
+
         Cursor cursor = null;
         if (type.equals(TYPE_YEAR)) {
             cursor = dbHelper.getStudentsByYear(Integer.parseInt(itemId));
@@ -216,23 +232,26 @@ public class GenericCrudActivity extends AppCompatActivity implements Navigation
             cursor = dbHelper.getStudentsBySubject(itemId);
         }
 
-        ArrayList<String> studentNames = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
         if (cursor != null && cursor.moveToFirst()) {
             do {
-                studentNames.add(cursor.getString(2) + " " + cursor.getString(1) + " (" + cursor.getString(0) + ")");
+                if (sb.length() > 0) sb.append("\n");
+                sb.append("• ").append(cursor.getString(2)).append(" ").append(cursor.getString(1))
+                        .append(" (").append(cursor.getString(0)).append(")");
             } while (cursor.moveToNext());
             cursor.close();
         }
 
-        if (studentNames.isEmpty()) {
-            Toast.makeText(this, "No students found in this " + type, Toast.LENGTH_SHORT).show();
+        if (sb.length() == 0) {
+            tvList.setText("No students found.");
         } else {
-            new AlertDialog.Builder(this)
-                    .setTitle("Students in " + type + ": " + itemId)
-                    .setItems(studentNames.toArray(new String[0]), null)
-                    .setPositiveButton("OK", null)
-                    .show();
+            tvList.setText(sb.toString());
         }
+
+        new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setPositiveButton("OK", null)
+                .show();
     }
 
     private void loadItems() {

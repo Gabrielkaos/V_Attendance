@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -278,16 +279,18 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
             String courses = cursor.getString(cursor.getColumnIndexOrThrow("allowed_course_ids"));
             String subjects = cursor.getString(cursor.getColumnIndexOrThrow("allowed_subject_ids"));
 
-            String info = "Name: " + name + "\n" +
-                          "Start: " + start + "\n" +
-                          "End: " + end + "\n" +
-                          "Allowed Years: " + years + "\n" +
-                          "Allowed Courses: " + courses + "\n" +
-                          "Allowed Subjects: " + subjects;
+            View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_event_details, null);
+            ((TextView) dialogView.findViewById(R.id.tvEventDetailId)).setText(eventId);
+            ((TextView) dialogView.findViewById(R.id.tvEventDetailName)).setText(name);
+            ((TextView) dialogView.findViewById(R.id.tvEventDetailSchedule)).setText(start + " to " + end);
+
+            // Fetch names for years, courses, subjects
+            ((TextView) dialogView.findViewById(R.id.tvEventDetailYears)).setText(getNamesFromIds(years, "Year"));
+            ((TextView) dialogView.findViewById(R.id.tvEventDetailCourses)).setText(getNamesFromIds(courses, "Course"));
+            ((TextView) dialogView.findViewById(R.id.tvEventDetailSubjects)).setText(getNamesFromIds(subjects, "Subject"));
 
             new AlertDialog.Builder(this)
-                    .setTitle("Event Information")
-                    .setMessage(info)
+                    .setView(dialogView)
                     .setPositiveButton("Select for " + targetActivity, (dialog, which) -> {
                         Intent intent;
                         if ("Scan".equals(targetActivity)) {
@@ -302,6 +305,18 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
                     .show();
             cursor.close();
         }
+    }
+
+    private String getNamesFromIds(String ids, String type) {
+        if (ids == null || ids.isEmpty()) return "All";
+        String[] idArray = ids.split(",");
+        ArrayList<String> names = new ArrayList<>();
+        for (String id : idArray) {
+            if (type.equals("Year")) names.add(dbHelper.getYearName(Integer.parseInt(id)));
+            else if (type.equals("Course")) names.add(dbHelper.getCourseName(id));
+            else if (type.equals("Subject")) names.add(dbHelper.getSubjectName(id));
+        }
+        return TextUtils.join(", ", names);
     }
 
     @Override
