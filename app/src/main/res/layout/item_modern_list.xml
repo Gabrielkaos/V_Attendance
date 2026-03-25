@@ -55,13 +55,5 @@
                 android:textColor="?attr/colorOnSurfaceVariant" />
         </LinearLayout>
 
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@android:drawable/ic_media_play"
-            android:rotation="0"
-            app:tint="?attr/colorOnSurfaceVariant"
-            android:alpha="0.5" />
-
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
