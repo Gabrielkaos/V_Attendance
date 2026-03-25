@@ -2,7 +2,7 @@ package com.example.v_attendance;
 
 import androidx.annotation.NonNull;
 
-public class Student {
+public class Student implements ModernListAdapter.ModernItem {
     public String studentId;
     public String lastName;
     public String firstName;
@@ -31,6 +31,21 @@ public class Student {
 
     public String getFullName() {
         return lastName + ", " + firstName + " " + middleName;
+    }
+
+    @Override
+    public String getMainTitle() {
+        return firstName + " " + lastName;
+    }
+
+    @Override
+    public String getSubTitle() {
+        return studentId;
+    }
+
+    @Override
+    public String getIconText() {
+        return firstName.substring(0, 1).toUpperCase();
     }
 
     @NonNull

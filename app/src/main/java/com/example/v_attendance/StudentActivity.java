@@ -32,8 +32,8 @@ public class StudentActivity extends AppCompatActivity implements NavigationView
 
     private DatabaseHelper dbHelper;
     private ListView lvStudents;
-    private ArrayList<Student> studentList;
-    private ArrayAdapter<Student> adapter;
+    private ArrayList<Object> studentList;
+    private ModernListAdapter adapter;
     private ExtendedFloatingActionButton fabAdd;
     private EditText etSearch;
     private DrawerLayout drawerLayout;
@@ -65,7 +65,7 @@ public class StudentActivity extends AppCompatActivity implements NavigationView
         etSearch = findViewById(R.id.etSearchStudent);
 
         studentList = new ArrayList<>();
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, studentList);
+        adapter = new ModernListAdapter(this, studentList);
         lvStudents.setAdapter(adapter);
         
         loadStudents();
@@ -78,7 +78,8 @@ public class StudentActivity extends AppCompatActivity implements NavigationView
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                adapter.getFilter().filter(s);
+                // For ModernListAdapter, we handle filtering manually or via a filter in the adapter
+                loadStudents(s.toString());
             }
 
             @Override
@@ -86,12 +87,12 @@ public class StudentActivity extends AppCompatActivity implements NavigationView
         });
 
         lvStudents.setOnItemClickListener((parent, view, position, id) -> {
-            Student s = adapter.getItem(position);
+            Student s = (Student) adapter.getItem(position);
             showStudentDetails(s);
         });
 
         lvStudents.setOnItemLongClickListener((parent, view, position, id) -> {
-            final Student student = adapter.getItem(position);
+            final Student student = (Student) adapter.getItem(position);
             new AlertDialog.Builder(this)
                     .setTitle("Delete Student")
                     .setMessage("Delete " + student.getName() + "?")
@@ -269,11 +270,15 @@ public class StudentActivity extends AppCompatActivity implements NavigationView
     }
 
     private void loadStudents() {
+        loadStudents("");
+    }
+
+    private void loadStudents(String query) {
         studentList.clear();
         Cursor cursor = dbHelper.getAllStudents();
         if (cursor != null && cursor.moveToFirst()) {
             do {
-                studentList.add(new Student(
+                Student s = new Student(
                         cursor.getString(0),
                         cursor.getString(1),
                         cursor.getString(2),
@@ -281,13 +286,13 @@ public class StudentActivity extends AppCompatActivity implements NavigationView
                         cursor.getInt(4),
                         cursor.getString(5),
                         cursor.getString(6)
-                ));
+                );
+                if (query.isEmpty() || s.getFullName().toLowerCase().contains(query.toLowerCase()) || s.studentId.contains(query)) {
+                    studentList.add(s);
+                }
             } while (cursor.moveToNext());
             cursor.close();
         }
         adapter.notifyDataSetChanged();
-        if (!etSearch.getText().toString().isEmpty()) {
-            adapter.getFilter().filter(etSearch.getText().toString());
-        }
     }
 }

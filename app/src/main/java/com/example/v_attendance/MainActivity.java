@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.navigation.NavigationView;
 
 import java.text.SimpleDateFormat;
@@ -50,7 +51,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         tvActiveEventCount = findViewById(R.id.tvActiveEventCount);
         containerUpcoming = findViewById(R.id.containerUpcoming);
 
+        setupQuickActions();
         refreshStats();
+    }
+
+    private void setupQuickActions() {
+        MaterialCardView cardAddStudent = findViewById(R.id.cardQuickAddStudent);
+        MaterialCardView cardAddEvent = findViewById(R.id.cardQuickAddEvent);
+        MaterialCardView cardMarkAttendance = findViewById(R.id.cardQuickMarkAttendance);
+        MaterialCardView cardScanAttendance = findViewById(R.id.cardQuickScanAttendance);
+
+        cardAddStudent.setOnClickListener(v -> {
+            startActivity(new Intent(this, StudentActivity.class));
+        });
+
+        cardAddEvent.setOnClickListener(v -> {
+            startActivity(new Intent(this, EventAddActivity.class));
+        });
+
+        cardMarkAttendance.setOnClickListener(v -> {
+            Intent intent = new Intent(this, EventListActivity.class);
+            intent.putExtra(EventListActivity.EXTRA_TARGET, "List");
+            startActivity(intent);
+        });
+
+        cardScanAttendance.setOnClickListener(v -> {
+            Intent intent = new Intent(this, EventListActivity.class);
+            intent.putExtra(EventListActivity.EXTRA_TARGET, "Scan");
+            startActivity(intent);
+        });
     }
 
     @Override

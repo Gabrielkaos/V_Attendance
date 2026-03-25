@@ -38,9 +38,9 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
     private ListView lvEvents;
     private ExtendedFloatingActionButton fabAdd;
     private EditText etSearch;
-    private ArrayList<String> eventNames, eventIds;
+    private ArrayList<Object> eventList;
     private String targetActivity;
-    private ArrayAdapter<String> adapter;
+    private ModernListAdapter adapter;
     private DrawerLayout drawerLayout;
 
     private String selectedYears = "";
@@ -75,9 +75,8 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
         fabAdd = findViewById(R.id.fabAddEvent);
         etSearch = findViewById(R.id.etSearchEvent);
 
-        eventNames = new ArrayList<>();
-        eventIds = new ArrayList<>();
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, eventNames);
+        eventList = new ArrayList<>();
+        adapter = new ModernListAdapter(this, eventList);
         lvEvents.setAdapter(adapter);
 
         fabAdd.setOnClickListener(v -> showAddEventDialog());
@@ -88,7 +87,7 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                adapter.getFilter().filter(s);
+                loadEvents(s.toString());
             }
 
             @Override
@@ -96,26 +95,42 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
         });
 
         lvEvents.setOnItemClickListener((parent, view, position, id) -> {
-            String selectedItem = adapter.getItem(position);
-            // Extract ID from "Name (ID)" format
-            String eventId = selectedItem.substring(selectedItem.lastIndexOf("(") + 1, selectedItem.lastIndexOf(")"));
-            showEventDetailsOrSelect(eventId);
+            Object selectedObject = adapter.getItem(position);
+            String eventId = "";
+            if (selectedObject instanceof String) {
+                String s = (String) selectedObject;
+                if (s.contains(" - ")) {
+                    eventId = s.split(" - ")[0];
+                }
+            }
+            if (!eventId.isEmpty()) {
+                showEventDetailsOrSelect(eventId);
+            }
         });
 
         lvEvents.setOnItemLongClickListener((parent, view, position, id) -> {
-            String selectedItem = adapter.getItem(position);
-            String eventId = selectedItem.substring(selectedItem.lastIndexOf("(") + 1, selectedItem.lastIndexOf(")"));
+            Object selectedObject = adapter.getItem(position);
+            String eventId = "";
+            if (selectedObject instanceof String) {
+                String s = (String) selectedObject;
+                if (s.contains(" - ")) {
+                    eventId = s.split(" - ")[0];
+                }
+            }
             
-            new AlertDialog.Builder(this)
-                    .setTitle("Delete Event")
-                    .setMessage("Are you sure you want to delete: " + selectedItem + "?")
-                    .setPositiveButton("Delete", (dialog, which) -> {
-                        dbHelper.deleteEvent(eventId);
-                        Toast.makeText(this, "Event deleted", Toast.LENGTH_SHORT).show();
-                        loadEvents();
-                    })
-                    .setNegativeButton("Cancel", null)
-                    .show();
+            if (!eventId.isEmpty()) {
+                final String finalId = eventId;
+                new AlertDialog.Builder(this)
+                        .setTitle("Delete Event")
+                        .setMessage("Are you sure you want to delete event: " + eventId + "?")
+                        .setPositiveButton("Delete", (dialog, which) -> {
+                            dbHelper.deleteEvent(finalId);
+                            Toast.makeText(this, "Event deleted", Toast.LENGTH_SHORT).show();
+                            loadEvents();
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .show();
+            }
             return true;
         });
     }
@@ -312,7 +327,11 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
         String[] idArray = ids.split(",");
         ArrayList<String> names = new ArrayList<>();
         for (String id : idArray) {
-            if (type.equals("Year")) names.add(dbHelper.getYearName(Integer.parseInt(id)));
+            if (type.equals("Year")) {
+                try {
+                    names.add(dbHelper.getYearName(Integer.parseInt(id)));
+                } catch (Exception e) {}
+            }
             else if (type.equals("Course")) names.add(dbHelper.getCourseName(id));
             else if (type.equals("Subject")) names.add(dbHelper.getSubjectName(id));
         }
@@ -326,19 +345,25 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
     }
 
     private void loadEvents() {
-        eventNames.clear();
-        eventIds.clear();
+        loadEvents("");
+    }
+
+    private void loadEvents(String query) {
+        eventList.clear();
         Cursor cursor = dbHelper.getAllEvents();
         if (cursor != null && cursor.moveToFirst()) {
             do {
-                eventIds.add(cursor.getString(0));
-                eventNames.add(cursor.getString(1) + " (" + cursor.getString(0) + ")");
+                String id = cursor.getString(0);
+                String name = cursor.getString(1);
+                String full = name + " (" + id + ")";
+                if (query.isEmpty() || full.toLowerCase().contains(query.toLowerCase())) {
+                    // We use a custom string format that the ModernListAdapter can parse
+                    // "ID - Name"
+                    eventList.add(id + " - " + name);
+                }
             } while (cursor.moveToNext());
             cursor.close();
         }
         adapter.notifyDataSetChanged();
-        if (!etSearch.getText().toString().isEmpty()) {
-            adapter.getFilter().filter(etSearch.getText().toString());
-        }
     }
 }

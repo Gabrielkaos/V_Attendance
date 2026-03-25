@@ -37,8 +37,8 @@ public class GenericCrudActivity extends AppCompatActivity implements Navigation
     private String type;
     private DatabaseHelper dbHelper;
     private ListView lvItems;
-    private ArrayList<String> itemList;
-    private ArrayAdapter<String> adapter;
+    private ArrayList<Object> itemList;
+    private ModernListAdapter adapter;
     private ExtendedFloatingActionButton fabAdd;
     private DrawerLayout drawerLayout;
     private EditText etSearch;
@@ -72,7 +72,7 @@ public class GenericCrudActivity extends AppCompatActivity implements Navigation
         etSearch = findViewById(R.id.etSearchGeneric);
 
         itemList = new ArrayList<>();
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, itemList);
+        adapter = new ModernListAdapter(this, itemList);
         lvItems.setAdapter(adapter);
 
         loadItems();
@@ -85,7 +85,7 @@ public class GenericCrudActivity extends AppCompatActivity implements Navigation
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                adapter.getFilter().filter(s);
+                loadItems(s.toString());
             }
 
             @Override
@@ -93,14 +93,14 @@ public class GenericCrudActivity extends AppCompatActivity implements Navigation
         });
 
         lvItems.setOnItemClickListener((parent, view, position, id) -> {
-            String selected = adapter.getItem(position);
+            String selected = (String) adapter.getItem(position);
             String itemId = selected.split(" - ")[0];
             String itemName = selected.split(" - ")[1];
             showItemDetails(itemId, itemName);
         });
 
         lvItems.setOnItemLongClickListener((parent, view, position, id) -> {
-            String selected = adapter.getItem(position);
+            String selected = (String) adapter.getItem(position);
             String itemId = selected.split(" - ")[0];
             new AlertDialog.Builder(this)
                     .setTitle("Delete " + type)
@@ -255,6 +255,10 @@ public class GenericCrudActivity extends AppCompatActivity implements Navigation
     }
 
     private void loadItems() {
+        loadItems("");
+    }
+
+    private void loadItems(String query) {
         itemList.clear();
         Cursor cursor = null;
         if (type.equals(TYPE_YEAR)) cursor = dbHelper.getAllYears();
@@ -263,7 +267,12 @@ public class GenericCrudActivity extends AppCompatActivity implements Navigation
 
         if (cursor != null && cursor.moveToFirst()) {
             do {
-                itemList.add(cursor.getString(0) + " - " + cursor.getString(1));
+                String id = cursor.getString(0);
+                String name = cursor.getString(1);
+                String full = id + " - " + name;
+                if (query.isEmpty() || full.toLowerCase().contains(query.toLowerCase())) {
+                    itemList.add(full);
+                }
             } while (cursor.moveToNext());
             cursor.close();
         }

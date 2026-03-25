@@ -52,7 +52,8 @@
                         android:layout_weight="1"
                         android:layout_margin="6dp"
                         app:cardCornerRadius="16dp"
-                        style="@style/Widget.Material3.CardView.Elevated">
+                        style="@style/Widget.Material3.CardView.Filled"
+                        app:cardBackgroundColor="?attr/colorPrimaryContainer">
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -66,11 +67,12 @@
                                 android:text="0"
                                 style="@style/TextAppearance.Material3.HeadlineMedium"
                                 android:textStyle="bold"
-                                android:textColor="?attr/colorPrimary" />
+                                android:textColor="?attr/colorOnPrimaryContainer" />
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Students"
+                                android:textColor="?attr/colorOnPrimaryContainer"
                                 style="@style/TextAppearance.Material3.LabelLarge" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
@@ -81,7 +83,8 @@
                         android:layout_weight="1"
                         android:layout_margin="6dp"
                         app:cardCornerRadius="16dp"
-                        style="@style/Widget.Material3.CardView.Elevated">
+                        style="@style/Widget.Material3.CardView.Filled"
+                        app:cardBackgroundColor="?attr/colorSecondaryContainer">
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -95,11 +98,12 @@
                                 android:text="0"
                                 style="@style/TextAppearance.Material3.HeadlineMedium"
                                 android:textStyle="bold"
-                                android:textColor="?attr/colorPrimary" />
+                                android:textColor="?attr/colorOnSecondaryContainer" />
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Events"
+                                android:textColor="?attr/colorOnSecondaryContainer"
                                 style="@style/TextAppearance.Material3.LabelLarge" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
@@ -134,6 +138,134 @@
                             style="@style/TextAppearance.Material3.LabelLarge" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Quick Actions"
+                    style="@style/TextAppearance.Material3.TitleLarge"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginBottom="16dp" />
+
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:columnCount="2"
+                    android:rowCount="2">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardQuickAddStudent"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="6dp"
+                        app:cardCornerRadius="16dp"
+                        style="@style/Widget.Material3.CardView.Elevated">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="16dp"
+                            android:gravity="center">
+                            <ImageView
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:src="@android:drawable/ic_menu_add"
+                                app:tint="?attr/colorPrimary" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Add Student"
+                                android:layout_marginTop="8dp"
+                                style="@style/TextAppearance.Material3.LabelLarge" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardQuickAddEvent"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="6dp"
+                        app:cardCornerRadius="16dp"
+                        style="@style/Widget.Material3.CardView.Elevated">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="16dp"
+                            android:gravity="center">
+                            <ImageView
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:src="@android:drawable/ic_menu_my_calendar"
+                                app:tint="?attr/colorPrimary" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="New Event"
+                                android:layout_marginTop="8dp"
+                                style="@style/TextAppearance.Material3.LabelLarge" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardQuickMarkAttendance"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="6dp"
+                        app:cardCornerRadius="16dp"
+                        style="@style/Widget.Material3.CardView.Elevated">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="16dp"
+                            android:gravity="center">
+                            <ImageView
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:src="@android:drawable/ic_menu_edit"
+                                app:tint="?attr/colorPrimary" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Mark Att."
+                                android:layout_marginTop="8dp"
+                                style="@style/TextAppearance.Material3.LabelLarge" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardQuickScanAttendance"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="6dp"
+                        app:cardCornerRadius="16dp"
+                        style="@style/Widget.Material3.CardView.Elevated">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="16dp"
+                            android:gravity="center">
+                            <ImageView
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:src="@android:drawable/ic_menu_camera"
+                                app:tint="?attr/colorPrimary" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Scan QR"
+                                android:layout_marginTop="8dp"
+                                style="@style/TextAppearance.Material3.LabelLarge" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                </GridLayout>
 
                 <TextView
                     android:layout_width="wrap_content"
